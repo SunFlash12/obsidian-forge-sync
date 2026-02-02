@@ -1,0 +1,58 @@
+/* Forge Sync Plugin Styles */
+
+.forge-sync-status {
+  padding: 1em;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  margin-bottom: 1em;
+}
+
+.forge-sync-status p {
+  margin: 0.5em 0;
+  color: var(--text-muted);
+}
+
+.forge-sync-status p:first-child {
+  margin-top: 0;
+}
+
+.forge-sync-status p:last-child {
+  margin-bottom: 0;
+}
+
+/* Status bar styling */
+.forge-sync-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.forge-sync-statusbar.syncing {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Settings improvements */
+.setting-item-info {
+  flex-grow: 1;
+}
+
+.setting-item-control {
+  flex-shrink: 0;
+}
+
+/* Notice styling */
+.forge-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.forge-notice-icon {
+  width: 16px;
+  height: 16px;
+}
