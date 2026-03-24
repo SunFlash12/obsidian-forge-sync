@@ -1,3 +1,4 @@
+import { Logger } from './logger';
 import {
   App,
   Notice,
@@ -7,69 +8,151 @@ import {
   TFile,
   debounce,
   requestUrl,
+  RequestUrlResponse,
 } from 'obsidian';
+
+// ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Settings ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
 interface ForgeSyncSettings {
   forgeApiUrl: string;
   authToken: string;
+  authType: 'bearer' | 'apikey';
+  vaultId: string | null;
   autoSync: boolean;
   autoSyncInterval: number; // minutes
   syncDirection: 'push' | 'pull' | 'bidirectional';
+  conflictResolution: 'newest_wins' | 'obsidian_wins' | 'forge_wins' | 'manual';
   excludeFolders: string[];
   excludeTags: string[];
+  debugLogging: boolean;
 }
 
 const DEFAULT_SETTINGS: ForgeSyncSettings = {
   forgeApiUrl: 'https://forgecascade.org/api/v1',
   authToken: '',
+  authType: 'bearer',
+  vaultId: null,
   autoSync: false,
   autoSyncInterval: 5,
   syncDirection: 'bidirectional',
+  conflictResolution: 'newest_wins',
   excludeFolders: ['.obsidian', '.git', '.trash'],
   excludeTags: ['private', 'draft'],
+  debugLogging: false,
 };
 
-interface SyncState {
+// ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Sync State (stored separately from settings) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+interface SyncStateData {
   lastSyncAt: string | null;
-  syncedNotes: Record<string, { hash: string; capsuleId: string }>;
+  syncedNotes: Record<string, { hash: string; capsuleId: string; lastModified: string }>;
   pendingChanges: string[];
 }
 
+// ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ API Response Types ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+interface VaultResponse {
+  id: string;
+  name: string;
+  path: string;
+  sync_direction: string;
+  conflict_resolution: string;
+  include_folders: string[];
+  exclude_folders: string[];
+  include_tags: string[];
+  exclude_tags: string[];
+  auto_sync: boolean;
+  auto_sync_interval_minutes: number;
+  is_active: boolean;
+  last_sync_at: string | null;
+  last_sync_status: string;
+  total_notes: number;
+  synced_notes: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface SyncResultResponse {
+  vault_id: string;
+  started_at: string;
+  completed_at: string | null;
+  duration_seconds: number | null;
+  notes_scanned: number;
+  notes_synced: number;
+  notes_created: number;
+  notes_updated: number;
+  notes_deleted: number;
+  conflicts_found: number;
+  conflicts_resolved: number;
+  errors: number;
+  status: string;
+  error_messages: string[];
+}
+
+interface SyncStatusResponse {
+  vault_id: string;
+  status: string;
+  last_sync_at: string | null;
+  total_notes: number;
+  synced_notes: number;
+  pending_syncs: number;
+  unresolved_conflicts: number;
+  watching: boolean;
+  last_error: string | null;
+}
+
+interface ConflictResponse {
+  id: string;
+  vault_id: string;
+  note_path: string;
+  capsule_id: string;
+  obsidian_modified_at: string | null;
+  forge_modified_at: string | null;
+  resolved: boolean;
+  resolution: string | null;
+  resolved_at: string | null;
+  resolved_by: string | null;
+  created_at: string;
+}
+
+// ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Plugin ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
 export default class ForgeSyncPlugin extends Plugin {
   settings: ForgeSyncSettings;
-  syncState: SyncState;
-  private autoSyncInterval: number | null = null;
+  syncState: SyncStateData;
+  private autoSyncIntervalId: number | null = null;
   private statusBarItem: HTMLElement | null = null;
+  private isSyncing = false;
+  private debouncedSync: () => void;
 
   async onload() {
-    await this.loadSettings();
-    await this.loadSyncState();
+    await this.loadPluginData();
 
-    // Add status bar item
     this.statusBarItem = this.addStatusBarItem();
     this.updateStatusBar('idle');
 
-    // Add ribbon icon for manual sync
-    this.addRibbonIcon('refresh-cw', 'Sync with Forge', async () => {
-      await this.syncAll();
-    });
+    // Debounced full sync for on-modify (3s debounce)
+    this.debouncedSync = debounce(() => {
+      if (this.settings.autoSync && !this.isSyncing) {
+        this.syncAll();
+      }
+    }, 3000, true);
 
-    // Add commands
+    this.addRibbonIcon('refresh-cw', 'Sync with Forge', () => this.syncAll());
+
     this.addCommand({
       id: 'forge-sync-all',
       name: 'Sync all notes with Forge',
-      callback: async () => {
-        await this.syncAll();
-      },
+      callback: () => this.syncAll(),
     });
 
     this.addCommand({
       id: 'forge-sync-current',
       name: 'Sync current note with Forge',
-      callback: async () => {
+      callback: () => {
         const file = this.app.workspace.getActiveFile();
         if (file) {
-          await this.syncFile(file);
+          this.syncAll();
         } else {
           new Notice('No active file to sync');
         }
@@ -77,155 +160,193 @@ export default class ForgeSyncPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: 'forge-push-current',
-      name: 'Push current note to Forge',
+      id: 'forge-check-conflicts',
+      name: 'Check sync conflicts',
+      callback: () => this.checkConflicts(),
+    });
+
+    this.addCommand({
+      id: 'forge-test-connection',
+      name: 'Test Forge connection',
       callback: async () => {
-        const file = this.app.workspace.getActiveFile();
-        if (file) {
-          await this.pushFile(file);
-        } else {
-          new Notice('No active file to push');
-        }
+        const result = await this.testConnection();
+        new Notice(result.ok ? `Connected: ${result.message}` : `Failed: ${result.message}`);
       },
     });
 
-    // Add settings tab
     this.addSettingTab(new ForgeSyncSettingTab(this.app, this));
 
-    // Set up file watchers for auto-sync
     if (this.settings.autoSync) {
       this.startAutoSync();
     }
 
-    // Watch for file changes
+    // File watchers ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â 'modify' fires a debounced sync, others update state
     this.registerEvent(
-      this.app.vault.on('modify', debounce(this.onFileModify.bind(this), 2000, true))
+      this.app.vault.on('modify', (file) => {
+        if (file instanceof TFile) this.onFileModify(file);
+      })
+    );
+    this.registerEvent(
+      this.app.vault.on('delete', (file) => {
+        if (file instanceof TFile) this.onFileDelete(file);
+      })
+    );
+    this.registerEvent(
+      this.app.vault.on('rename', (file, oldPath) => {
+        if (file instanceof TFile) this.onFileRename(file, oldPath);
+      })
     );
 
-    this.registerEvent(
-      this.app.vault.on('create', this.onFileCreate.bind(this))
-    );
+    // One-click connect: handle obsidian://forge-sync?token=xxx&url=xxx
+    this.registerObsidianProtocolHandler('forge-sync', async (params) => {
+      Logger.info('Forge Sync URI handler triggered', params);
+      let changed = false;
 
-    this.registerEvent(
-      this.app.vault.on('delete', this.onFileDelete.bind(this))
-    );
+      if (params.token) {
+        this.settings.authToken = params.token;
+        changed = true;
+      }
+      if (params.url) {
+        this.settings.forgeApiUrl = params.url;
+        changed = true;
+      }
+      if (params.authtype === 'apikey' || params.authtype === 'bearer') {
+        this.settings.authType = params.authtype as 'bearer' | 'apikey';
+        changed = true;
+      }
 
-    this.registerEvent(
-      this.app.vault.on('rename', this.onFileRename.bind(this))
-    );
+      if (changed) {
+        // Auto-enable sync with sensible defaults
+        this.settings.autoSync = true;
+        this.settings.syncDirection = 'bidirectional';
+        this.settings.autoSyncInterval = 10;
+        await this.saveSettings();
 
-    console.log('Forge Sync plugin loaded');
+        // Test connection
+        const result = await this.testConnection();
+        if (result.ok) {
+          new Notice('Forge connected successfully! Starting sync...');
+          this.startAutoSync();
+          // Trigger initial sync
+          await this.syncAll();
+        } else {
+          new Notice('Forge connection failed: ' + result.message);
+        }
+      } else {
+        new Notice('Forge Sync: No configuration parameters provided in URL');
+      }
+    });
+
+    Logger.info('Forge Sync plugin loaded');
   }
 
   onunload() {
     this.stopAutoSync();
-    console.log('Forge Sync plugin unloaded');
+    Logger.info('Forge Sync plugin unloaded');
   }
 
-  async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Persistence (settings + syncState under separate keys) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+  private async loadPluginData() {
+    const raw = (await this.loadData()) || {};
+
+    // Migrate from old format where settings were at top level
+    if (raw.forgeApiUrl !== undefined && !raw.settings) {
+      const { syncState, ...oldSettings } = raw;
+      this.settings = Object.assign({}, DEFAULT_SETTINGS, oldSettings);
+      this.syncState = syncState || { lastSyncAt: null, syncedNotes: {}, pendingChanges: [] };
+      // Re-save in new structured format
+      await this.saveData({ settings: this.settings, syncState: this.syncState });
+    } else {
+      this.settings = Object.assign({}, DEFAULT_SETTINGS, raw.settings || {});
+      this.syncState = Object.assign(
+        { lastSyncAt: null, syncedNotes: {}, pendingChanges: [] },
+        raw.syncState || {},
+      );
+    }
+
+    Logger.debugMode = this.settings.debugLogging;
   }
 
   async saveSettings() {
-    await this.saveData(this.settings);
-  }
-
-  async loadSyncState() {
-    const data = await this.loadData();
-    this.syncState = data?.syncState || {
-      lastSyncAt: null,
-      syncedNotes: {},
-      pendingChanges: [],
-    };
-  }
-
-  async saveSyncState() {
-    const data = await this.loadData() || {};
-    data.syncState = this.syncState;
+    const data = (await this.loadData()) || {};
+    data.settings = { ...this.settings };
     await this.saveData(data);
   }
 
-  updateStatusBar(status: 'idle' | 'syncing' | 'success' | 'error') {
-    if (!this.statusBarItem) return;
-
-    const icons: Record<string, string> = {
-      idle: '⚪',
-      syncing: '🔄',
-      success: '✅',
-      error: '❌',
-    };
-
-    this.statusBarItem.setText(`Forge ${icons[status]}`);
+  async saveSyncState() {
+    const data = (await this.loadData()) || {};
+    data.syncState = { ...this.syncState };
+    await this.saveData(data);
   }
 
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Status bar (plain text, no emoji) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+  updateStatusBar(status: 'idle' | 'syncing' | 'success' | 'error' | 'conflict') {
+    if (!this.statusBarItem) return;
+    const labels: Record<string, string> = {
+      idle: 'Forge [idle]',
+      syncing: 'Forge [syncing...]',
+      success: 'Forge [ok]',
+      error: 'Forge [error]',
+      conflict: 'Forge [conflicts]',
+    };
+    this.statusBarItem.setText(labels[status] || 'Forge');
+  }
+
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Auto-sync ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
   startAutoSync() {
-    if (this.autoSyncInterval) return;
-
-    this.autoSyncInterval = window.setInterval(
+    if (this.autoSyncIntervalId) return;
+    this.autoSyncIntervalId = window.setInterval(
       () => this.syncAll(),
-      this.settings.autoSyncInterval * 60 * 1000
+      this.settings.autoSyncInterval * 60 * 1000,
     );
-
-    console.log(`Auto-sync started (every ${this.settings.autoSyncInterval} minutes)`);
+    Logger.info(`Auto-sync started (every ${this.settings.autoSyncInterval} min)`);
   }
 
   stopAutoSync() {
-    if (this.autoSyncInterval) {
-      window.clearInterval(this.autoSyncInterval);
-      this.autoSyncInterval = null;
-      console.log('Auto-sync stopped');
+    if (this.autoSyncIntervalId) {
+      window.clearInterval(this.autoSyncIntervalId);
+      this.autoSyncIntervalId = null;
+      Logger.info('Auto-sync stopped');
     }
   }
 
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ File event handlers ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
   private shouldSyncFile(file: TFile): boolean {
-    // Only sync markdown files
     if (file.extension !== 'md') return false;
-
-    // Check exclude folders
     for (const folder of this.settings.excludeFolders) {
-      if (file.path.startsWith(folder + '/') || file.path === folder) {
-        return false;
-      }
+      if (file.path.startsWith(folder + '/') || file.path === folder) return false;
     }
-
     return true;
   }
 
-  private async onFileModify(file: TFile) {
+  private onFileModify(file: TFile) {
     if (!this.shouldSyncFile(file)) return;
 
-    // Add to pending changes
+    // Track the pending change
     if (!this.syncState.pendingChanges.includes(file.path)) {
       this.syncState.pendingChanges.push(file.path);
-      await this.saveSyncState();
     }
 
-    // Auto-sync if enabled
+    // Actually trigger a debounced sync (fix #6)
     if (this.settings.autoSync && this.settings.syncDirection !== 'pull') {
-      // Debounced sync handled by event registration
-    }
-  }
-
-  private async onFileCreate(file: TFile) {
-    if (!this.shouldSyncFile(file)) return;
-
-    if (this.settings.autoSync && this.settings.syncDirection !== 'pull') {
-      await this.pushFile(file);
+      this.debouncedSync();
     }
   }
 
   private async onFileDelete(file: TFile) {
     if (!this.shouldSyncFile(file)) return;
-
-    // Remove from sync state
     delete this.syncState.syncedNotes[file.path];
+    const idx = this.syncState.pendingChanges.indexOf(file.path);
+    if (idx !== -1) this.syncState.pendingChanges.splice(idx, 1);
     await this.saveSyncState();
   }
 
   private async onFileRename(file: TFile, oldPath: string) {
     if (!this.shouldSyncFile(file)) return;
-
-    // Update sync state with new path
     if (this.syncState.syncedNotes[oldPath]) {
       this.syncState.syncedNotes[file.path] = this.syncState.syncedNotes[oldPath];
       delete this.syncState.syncedNotes[oldPath];
@@ -233,202 +354,223 @@ export default class ForgeSyncPlugin extends Plugin {
     }
   }
 
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ HTTP helpers (supports Bearer + API Key) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+  private getAuthHeaders(): Record<string, string> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (this.settings.authType === 'apikey') {
+      headers['X-API-Key'] = this.settings.authToken;
+    } else {
+      headers['Authorization'] = `Bearer ${this.settings.authToken}`;
+    }
+    return headers;
+  }
+
+  private obsidianApiUrl(path: string): string {
+    const base = this.settings.forgeApiUrl.replace(/\/+$/, '');
+    return `${base}/obsidian${path}`;
+  }
+
+  private async apiRequest(
+    method: string,
+    path: string,
+    body?: unknown,
+  ): Promise<RequestUrlResponse> {
+    const opts: Parameters<typeof requestUrl>[0] = {
+      url: this.obsidianApiUrl(path),
+      method,
+      headers: this.getAuthHeaders(),
+    };
+    if (body !== undefined) {
+      opts.body = JSON.stringify(body);
+    }
+    return requestUrl(opts);
+  }
+
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Connection test ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+  async testConnection(): Promise<{ ok: boolean; message: string }> {
+    if (!this.settings.authToken) {
+      return { ok: false, message: 'No auth token configured' };
+    }
+    try {
+      const resp = await this.apiRequest('GET', '/vaults');
+      if (resp.status === 200) {
+        const vaults = resp.json as VaultResponse[];
+        return { ok: true, message: `${vaults.length} vault(s) registered on server.` };
+      }
+      return { ok: false, message: `Unexpected status: ${resp.status}` };
+    } catch (e: any) {
+      const status = e?.status || e?.response?.status;
+      if (status === 401 || status === 403) {
+        return { ok: false, message: 'Authentication failed. Check your token and auth type.' };
+      }
+      return { ok: false, message: `Connection failed: ${e?.message || String(e)}` };
+    }
+  }
+
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Vault registration ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+  private async ensureVaultRegistered(): Promise<string> {
+    // If we have a stored vault ID, verify it still exists on the server
+    if (this.settings.vaultId) {
+      try {
+        const resp = await this.apiRequest('GET', `/vaults/${this.settings.vaultId}`);
+        if (resp.status === 200) return this.settings.vaultId;
+      } catch {
+        Logger.warn('Stored vault ID not found on server, re-registering');
+        this.settings.vaultId = null;
+      }
+    }
+
+    // Register a new vault
+    const vaultName = this.app.vault.getName();
+    const vaultPath = (this.app.vault.adapter as any).basePath || vaultName;
+
+    const body = {
+      name: vaultName,
+      path: vaultPath,
+      sync_direction: this.settings.syncDirection,
+      conflict_resolution: this.settings.conflictResolution,
+      exclude_folders: this.settings.excludeFolders,
+      exclude_tags: this.settings.excludeTags,
+      auto_sync: this.settings.autoSync,
+      auto_sync_interval_minutes: this.settings.autoSyncInterval,
+    };
+
+    const resp = await this.apiRequest('POST', '/vaults', body);
+    const vault = resp.json as VaultResponse;
+    this.settings.vaultId = vault.id;
+    await this.saveSettings();
+
+    Logger.info(`Vault registered: ${vault.id}`);
+    return vault.id;
+  }
+
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Core sync (uses dedicated Obsidian vault API) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
   async syncAll(): Promise<void> {
     if (!this.settings.authToken) {
       new Notice('Please configure your Forge API token in settings');
       return;
     }
+    if (this.isSyncing) {
+      Logger.info('Sync already in progress, skipping');
+      return;
+    }
 
+    this.isSyncing = true;
     this.updateStatusBar('syncing');
     new Notice('Syncing with Forge...');
 
     try {
-      const files = this.app.vault.getMarkdownFiles().filter(f => this.shouldSyncFile(f));
-      let synced = 0;
-      let errors = 0;
+      const vaultId = await this.ensureVaultRegistered();
 
-      for (const file of files) {
-        try {
-          await this.syncFile(file);
-          synced++;
-        } catch (e) {
-          console.error(`Error syncing ${file.path}:`, e);
-          errors++;
-        }
-      }
+      // Trigger server-side sync via the dedicated endpoint
+      const resp = await this.apiRequest('POST', `/vaults/${vaultId}/sync`);
+      const result = resp.json as SyncResultResponse;
 
+      // Update local state
       this.syncState.lastSyncAt = new Date().toISOString();
       this.syncState.pendingChanges = [];
       await this.saveSyncState();
 
-      this.updateStatusBar(errors > 0 ? 'error' : 'success');
-      new Notice(`Forge sync complete: ${synced} synced, ${errors} errors`);
+      // Report results
+      const hasConflicts = result.conflicts_found > result.conflicts_resolved;
 
-      // Reset status after a delay
-      setTimeout(() => this.updateStatusBar('idle'), 3000);
+      if (result.status === 'error') {
+        this.updateStatusBar('error');
+        const errMsg = result.error_messages.length > 0
+          ? result.error_messages[0]
+          : 'Unknown error';
+        new Notice(`Forge sync error: ${errMsg}`);
+      } else if (hasConflicts) {
+        this.updateStatusBar('conflict');
+        new Notice(
+          `Forge sync: ${result.notes_synced} synced, `
+          + `${result.conflicts_found - result.conflicts_resolved} unresolved conflicts. `
+          + `Use "Check sync conflicts" command to resolve.`,
+        );
+      } else {
+        this.updateStatusBar('success');
+        new Notice(
+          `Forge sync complete: ${result.notes_synced} synced `
+          + `(${result.notes_created} new, ${result.notes_updated} updated)`,
+        );
+        setTimeout(() => this.updateStatusBar('idle'), 5000);
+      }
 
-    } catch (e) {
-      console.error('Sync failed:', e);
+      Logger.info('Sync result:', result);
+    } catch (e: any) {
+      Logger.error('Sync failed:', e);
       this.updateStatusBar('error');
-      new Notice(`Forge sync failed: ${e.message}`);
+      new Notice(`Forge sync failed: ${e?.message || String(e)}`);
+      setTimeout(() => this.updateStatusBar('idle'), 5000);
+    } finally {
+      this.isSyncing = false;
     }
   }
 
-  async syncFile(file: TFile): Promise<void> {
-    const content = await this.app.vault.read(file);
-    const hash = this.hashContent(content);
-    const existing = this.syncState.syncedNotes[file.path];
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Conflict management ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
-    if (existing && existing.hash === hash) {
-      // No changes
+  async checkConflicts(): Promise<void> {
+    if (!this.settings.vaultId) {
+      new Notice('No vault registered. Run a sync first.');
       return;
     }
 
-    if (this.settings.syncDirection === 'push' || this.settings.syncDirection === 'bidirectional') {
-      await this.pushFile(file);
-    }
-  }
+    try {
+      const resp = await this.apiRequest('GET', `/vaults/${this.settings.vaultId}/conflicts`);
+      const conflicts = resp.json as ConflictResponse[];
 
-  async pushFile(file: TFile): Promise<void> {
-    if (!this.settings.authToken) {
-      throw new Error('No auth token configured');
-    }
-
-    const content = await this.app.vault.read(file);
-    const { frontmatter, body } = this.parseFrontmatter(content);
-
-    // Extract tags from content
-    const tags = this.extractTags(content);
-
-    // Check exclude tags
-    for (const tag of this.settings.excludeTags) {
-      if (tags.includes(tag)) {
-        console.log(`Skipping ${file.path}: has excluded tag #${tag}`);
+      if (conflicts.length === 0) {
+        new Notice('No unresolved conflicts.');
+        this.updateStatusBar('idle');
         return;
       }
+
+      const summary = conflicts
+        .slice(0, 5)
+        .map(c => `  - ${c.note_path}`)
+        .join('\n');
+      const more = conflicts.length > 5 ? `\n  ...and ${conflicts.length - 5} more` : '';
+      new Notice(`${conflicts.length} unresolved conflict(s):\n${summary}${more}`, 10000);
+    } catch (e: any) {
+      Logger.error('Failed to check conflicts:', e);
+      new Notice(`Failed to check conflicts: ${e?.message || String(e)}`);
     }
+  }
 
-    // Build capsule data
-    const capsuleData = {
-      content: body,
-      title: frontmatter?.title || file.basename,
-      tags: tags,
-      metadata: {
-        source: 'obsidian',
-        obsidian_path: file.path,
-        ...frontmatter,
-      },
-    };
-
-    const existing = this.syncState.syncedNotes[file.path];
+  async resolveConflict(conflictId: string, resolution: string): Promise<boolean> {
+    if (!this.settings.vaultId) return false;
 
     try {
-      let response;
-      if (existing?.capsuleId) {
-        // Update existing capsule
-        response = await requestUrl({
-          url: `${this.settings.forgeApiUrl}/capsules/${existing.capsuleId}`,
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${this.settings.authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(capsuleData),
-        });
-      } else {
-        // Create new capsule
-        response = await requestUrl({
-          url: `${this.settings.forgeApiUrl}/capsules`,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.settings.authToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(capsuleData),
-        });
-      }
-
-      const result = response.json;
-
-      // Update sync state
-      this.syncState.syncedNotes[file.path] = {
-        hash: this.hashContent(content),
-        capsuleId: result.id,
-      };
-      await this.saveSyncState();
-
-      console.log(`Pushed ${file.path} to Forge (capsule: ${result.id})`);
-
-    } catch (e) {
-      console.error(`Failed to push ${file.path}:`, e);
-      throw e;
+      await this.apiRequest(
+        'POST',
+        `/vaults/${this.settings.vaultId}/conflicts/${conflictId}/resolve`,
+        { resolution },
+      );
+      return true;
+    } catch (e: any) {
+      Logger.error(`Failed to resolve conflict ${conflictId}:`, e);
+      return false;
     }
   }
 
-  private parseFrontmatter(content: string): { frontmatter: Record<string, any> | null; body: string } {
-    const match = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
-    if (!match) {
-      return { frontmatter: null, body: content };
-    }
+  async getSyncStatus(): Promise<SyncStatusResponse | null> {
+    if (!this.settings.vaultId) return null;
 
     try {
-      // Simple YAML parsing (for basic key: value pairs)
-      const frontmatter: Record<string, any> = {};
-      const lines = match[1].split('\n');
-      for (const line of lines) {
-        const [key, ...valueParts] = line.split(':');
-        if (key && valueParts.length > 0) {
-          const value = valueParts.join(':').trim();
-          // Handle arrays
-          if (value.startsWith('[') && value.endsWith(']')) {
-            frontmatter[key.trim()] = value.slice(1, -1).split(',').map(s => s.trim());
-          } else {
-            frontmatter[key.trim()] = value;
-          }
-        }
-      }
-      return { frontmatter, body: match[2] };
-    } catch (e) {
-      console.warn('Failed to parse frontmatter:', e);
-      return { frontmatter: null, body: content };
+      const resp = await this.apiRequest('GET', `/vaults/${this.settings.vaultId}/status`);
+      return resp.json as SyncStatusResponse;
+    } catch (e: any) {
+      Logger.error('Failed to get sync status:', e);
+      return null;
     }
-  }
-
-  private extractTags(content: string): string[] {
-    const tags = new Set<string>();
-
-    // Extract inline tags (#tag)
-    const tagRegex = /(?:^|\s)#([a-zA-Z][a-zA-Z0-9_/-]*)/g;
-    let match;
-    while ((match = tagRegex.exec(content)) !== null) {
-      tags.add(match[1].toLowerCase());
-    }
-
-    // Extract from frontmatter
-    const { frontmatter } = this.parseFrontmatter(content);
-    if (frontmatter?.tags) {
-      const fmTags = Array.isArray(frontmatter.tags)
-        ? frontmatter.tags
-        : String(frontmatter.tags).split(',');
-      for (const tag of fmTags) {
-        tags.add(String(tag).trim().toLowerCase());
-      }
-    }
-
-    return Array.from(tags);
-  }
-
-  private hashContent(content: string): string {
-    // Simple hash for change detection
-    let hash = 0;
-    for (let i = 0; i < content.length; i++) {
-      const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return hash.toString(16);
   }
 }
+
+// ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Settings Tab ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
 class ForgeSyncSettingTab extends PluginSettingTab {
   plugin: ForgeSyncPlugin;
@@ -444,10 +586,13 @@ class ForgeSyncSettingTab extends PluginSettingTab {
 
     containerEl.createEl('h2', { text: 'Forge Sync Settings' });
 
-    // API URL
+    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Connection ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+    containerEl.createEl('h3', { text: 'Connection' });
+
     new Setting(containerEl)
       .setName('Forge API URL')
-      .setDesc('The URL of your Forge instance API')
+      .setDesc('Base URL of your Forge instance API')
       .addText(text => text
         .setPlaceholder('https://forgecascade.org/api/v1')
         .setValue(this.plugin.settings.forgeApiUrl)
@@ -456,25 +601,64 @@ class ForgeSyncSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    // Auth Token
     new Setting(containerEl)
-      .setName('API Token')
-      .setDesc('Your Forge API authentication token')
-      .addText(text => text
-        .setPlaceholder('Enter your token')
-        .setValue(this.plugin.settings.authToken)
-        .onChange(async (value) => {
-          this.plugin.settings.authToken = value;
+      .setName('Auth Type')
+      .setDesc('Bearer token (user login) or API Key (agent/service)')
+      .addDropdown(dropdown => dropdown
+        .addOption('bearer', 'Bearer Token')
+        .addOption('apikey', 'API Key (X-API-Key)')
+        .setValue(this.plugin.settings.authType)
+        .onChange(async (value: 'bearer' | 'apikey') => {
+          this.plugin.settings.authType = value;
           await this.plugin.saveSettings();
         }));
 
-    // Sync Direction
+    new Setting(containerEl)
+      .setName('Auth Token')
+      .setDesc('Your Forge API token or API key')
+      .addText(text => {
+        text.inputEl.type = 'password';
+        text
+          .setPlaceholder('Enter your token')
+          .setValue(this.plugin.settings.authToken)
+          .onChange(async (value) => {
+            this.plugin.settings.authToken = value;
+            await this.plugin.saveSettings();
+          });
+      });
+
+    // Connection test
+    const testResultEl = containerEl.createDiv({ cls: 'forge-test-result' });
+
+    new Setting(containerEl)
+      .setName('Test Connection')
+      .setDesc('Verify API connection and credentials')
+      .addButton(button => button
+        .setButtonText('Test')
+        .onClick(async () => {
+          button.setButtonText('Testing...');
+          button.setDisabled(true);
+          const result = await this.plugin.testConnection();
+          testResultEl.empty();
+          testResultEl.createEl('p', {
+            text: result.ok ? result.message : result.message,
+            cls: result.ok ? 'forge-test-ok' : 'forge-test-fail',
+          });
+          testResultEl.style.color = result.ok ? 'var(--text-success)' : 'var(--text-error)';
+          button.setButtonText('Test');
+          button.setDisabled(false);
+        }));
+
+    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Sync Settings ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+    containerEl.createEl('h3', { text: 'Sync' });
+
     new Setting(containerEl)
       .setName('Sync Direction')
-      .setDesc('Choose how notes sync between Obsidian and Forge')
+      .setDesc('How notes sync between Obsidian and Forge')
       .addDropdown(dropdown => dropdown
-        .addOption('push', 'Obsidian → Forge')
-        .addOption('pull', 'Forge → Obsidian')
+        .addOption('push', 'Push: Obsidian -> Forge')
+        .addOption('pull', 'Pull: Forge -> Obsidian')
         .addOption('bidirectional', 'Bidirectional')
         .setValue(this.plugin.settings.syncDirection)
         .onChange(async (value: 'push' | 'pull' | 'bidirectional') => {
@@ -482,10 +666,23 @@ class ForgeSyncSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    // Auto Sync
+    new Setting(containerEl)
+      .setName('Conflict Resolution')
+      .setDesc('How to handle conflicts when both sides changed')
+      .addDropdown(dropdown => dropdown
+        .addOption('newest_wins', 'Newest Wins')
+        .addOption('obsidian_wins', 'Obsidian Wins')
+        .addOption('forge_wins', 'Forge Wins')
+        .addOption('manual', 'Manual')
+        .setValue(this.plugin.settings.conflictResolution)
+        .onChange(async (value: 'newest_wins' | 'obsidian_wins' | 'forge_wins' | 'manual') => {
+          this.plugin.settings.conflictResolution = value;
+          await this.plugin.saveSettings();
+        }));
+
     new Setting(containerEl)
       .setName('Auto Sync')
-      .setDesc('Automatically sync notes at regular intervals')
+      .setDesc('Sync automatically on file changes and at regular intervals')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.autoSync)
         .onChange(async (value) => {
@@ -498,10 +695,9 @@ class ForgeSyncSettingTab extends PluginSettingTab {
           }
         }));
 
-    // Auto Sync Interval
     new Setting(containerEl)
       .setName('Auto Sync Interval')
-      .setDesc('Minutes between automatic syncs')
+      .setDesc('Minutes between automatic full syncs')
       .addSlider(slider => slider
         .setLimits(1, 60, 1)
         .setValue(this.plugin.settings.autoSyncInterval)
@@ -515,10 +711,13 @@ class ForgeSyncSettingTab extends PluginSettingTab {
           }
         }));
 
-    // Exclude Folders
+    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Filters ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+    containerEl.createEl('h3', { text: 'Filters' });
+
     new Setting(containerEl)
       .setName('Exclude Folders')
-      .setDesc('Comma-separated list of folders to exclude from sync')
+      .setDesc('Comma-separated folders to exclude from sync')
       .addText(text => text
         .setPlaceholder('.obsidian, .git, archive')
         .setValue(this.plugin.settings.excludeFolders.join(', '))
@@ -527,7 +726,6 @@ class ForgeSyncSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    // Exclude Tags
     new Setting(containerEl)
       .setName('Exclude Tags')
       .setDesc('Notes with these tags will not be synced')
@@ -539,32 +737,84 @@ class ForgeSyncSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    // Sync Status
-    containerEl.createEl('h3', { text: 'Sync Status' });
+    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Advanced ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+    new Setting(containerEl)
+      .setName('Debug Logging')
+      .setDesc('Enable detailed logging in the developer console')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.debugLogging)
+        .onChange(async (value) => {
+          this.plugin.settings.debugLogging = value;
+          Logger.debugMode = value;
+          await this.plugin.saveSettings();
+        }));
+
+    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Status ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+    containerEl.createEl('h3', { text: 'Status' });
 
     const statusDiv = containerEl.createDiv({ cls: 'forge-sync-status' });
+
+    if (this.plugin.settings.vaultId) {
+      statusDiv.createEl('p', { text: `Vault ID: ${this.plugin.settings.vaultId}` });
+    } else {
+      statusDiv.createEl('p', { text: 'Vault: not registered (will register on first sync)' });
+    }
+
     statusDiv.createEl('p', {
-      text: `Last sync: ${this.plugin.syncState.lastSyncAt
-        ? new Date(this.plugin.syncState.lastSyncAt).toLocaleString()
-        : 'Never'}`
-    });
-    statusDiv.createEl('p', {
-      text: `Synced notes: ${Object.keys(this.plugin.syncState.syncedNotes).length}`
-    });
-    statusDiv.createEl('p', {
-      text: `Pending changes: ${this.plugin.syncState.pendingChanges.length}`
+      text: `Last sync: ${
+        this.plugin.syncState.lastSyncAt
+          ? new Date(this.plugin.syncState.lastSyncAt).toLocaleString()
+          : 'Never'
+      }`,
     });
 
-    // Manual Sync Button
+    statusDiv.createEl('p', {
+      text: `Synced notes: ${Object.keys(this.plugin.syncState.syncedNotes).length}`,
+    });
+
+    statusDiv.createEl('p', {
+      text: `Pending changes: ${this.plugin.syncState.pendingChanges.length}`,
+    });
+
+    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Actions ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+
+    containerEl.createEl('h3', { text: 'Actions' });
+
     new Setting(containerEl)
-      .setName('Manual Sync')
-      .setDesc('Sync all notes now')
+      .setName('Sync Now')
+      .setDesc('Trigger a full sync with Forge')
       .addButton(button => button
         .setButtonText('Sync Now')
         .setCta()
         .onClick(async () => {
           await this.plugin.syncAll();
-          this.display(); // Refresh the display
+          this.display();
         }));
+
+    new Setting(containerEl)
+      .setName('Check Conflicts')
+      .setDesc('View unresolved sync conflicts')
+      .addButton(button => button
+        .setButtonText('Check Conflicts')
+        .onClick(async () => {
+          await this.plugin.checkConflicts();
+        }));
+
+    if (this.plugin.settings.vaultId) {
+      new Setting(containerEl)
+        .setName('Re-register Vault')
+        .setDesc('Unlink this vault from Forge and register fresh on next sync')
+        .addButton(button => button
+          .setButtonText('Re-register')
+          .setWarning()
+          .onClick(async () => {
+            this.plugin.settings.vaultId = null;
+            await this.plugin.saveSettings();
+            new Notice('Vault unlinked. Next sync will register a new vault.');
+            this.display();
+          }));
+    }
   }
 }
