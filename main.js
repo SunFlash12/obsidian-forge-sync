@@ -361,9 +361,49 @@ var ForgeSyncPlugin = class extends import_obsidian.Plugin {
       const vaultId = await this.ensureVaultRegistered();
       const resp = await this.apiRequest("POST", `/vaults/${vaultId}/sync`);
       const result = resp.json;
+      let filesCreated = 0;
+      if (result.capsules && result.capsules.length > 0) {
+        const folder = "Forge Capsules";
+        if (!this.app.vault.getAbstractFileByPath(folder)) {
+          await this.app.vault.createFolder(folder);
+        }
+        for (const capsule of result.capsules) {
+          const safeName = capsule.title.replace(/[\\\\/:*?"<>|]/g, "-").replace(/\\s+/g, " ").trim().substring(0, 100);
+          const filePath = folder + "/" + safeName + ".md";
+          if (this.app.vault.getAbstractFileByPath(filePath)) {
+            continue;
+          }
+          const parts = ["---"];
+          parts.push("id: " + capsule.id);
+          parts.push("type: " + capsule.capsule_type);
+          parts.push("domain: " + capsule.domain);
+          parts.push("confidence: " + capsule.confidence);
+          parts.push("created: " + capsule.created_at);
+          if (capsule.source_url)
+            parts.push("source: " + capsule.source_url);
+          if (capsule.tags && capsule.tags.length > 0)
+            parts.push("tags: [" + capsule.tags.join(", ") + "]");
+          parts.push("---");
+          parts.push("");
+          parts.push("# " + capsule.title);
+          parts.push("");
+          parts.push(capsule.content);
+          try {
+            await this.app.vault.create(filePath, parts.join("\n"));
+            filesCreated++;
+          } catch (err) {
+            Logger.error("Failed to create file:", err);
+          }
+        }
+        Logger.info("Created " + filesCreated + " capsule files");
+      }
       this.syncState.lastSyncAt = (/* @__PURE__ */ new Date()).toISOString();
       this.syncState.pendingChanges = [];
       await this.saveSyncState();
+      if (filesCreated > 0) {
+        result.notes_created = filesCreated;
+        result.notes_synced = filesCreated;
+      }
       const hasConflicts = result.conflicts_found > result.conflicts_resolved;
       if (result.status === "error") {
         this.updateStatusBar("error");

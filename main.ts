@@ -87,6 +87,18 @@ interface SyncResultResponse {
   errors: number;
   status: string;
   error_messages: string[];
+  capsules?: Array<{
+    id: string;
+    title: string;
+    content: string;
+    capsule_type: string;
+    domain: string;
+    confidence: number;
+    created_at: string;
+    updated_at: string;
+    tags: string[];
+    source_url: string;
+  }>;
 }
 
 interface SyncStatusResponse {
@@ -470,12 +482,56 @@ export default class ForgeSyncPlugin extends Plugin {
       const resp = await this.apiRequest('POST', `/vaults/${vaultId}/sync`);
       const result = resp.json as SyncResultResponse;
 
+      // Create local files from capsules returned by server
+      let filesCreated = 0;
+      if (result.capsules && result.capsules.length > 0) {
+        const folder = 'Forge Capsules';
+        if (!this.app.vault.getAbstractFileByPath(folder)) {
+          await this.app.vault.createFolder(folder);
+        }
+        for (const capsule of result.capsules) {
+          const safeName = capsule.title
+            .replace(/[\\\\/:*?"<>|]/g, '-')
+            .replace(/\\s+/g, ' ')
+            .trim()
+            .substring(0, 100);
+          const filePath = folder + '/' + safeName + '.md';
+          if (this.app.vault.getAbstractFileByPath(filePath)) {
+            continue;
+          }
+          const parts: string[] = ['---'];
+          parts.push('id: ' + capsule.id);
+          parts.push('type: ' + capsule.capsule_type);
+          parts.push('domain: ' + capsule.domain);
+          parts.push('confidence: ' + capsule.confidence);
+          parts.push('created: ' + capsule.created_at);
+          if (capsule.source_url) parts.push('source: ' + capsule.source_url);
+          if (capsule.tags && capsule.tags.length > 0) parts.push('tags: [' + capsule.tags.join(', ') + ']');
+          parts.push('---');
+          parts.push('');
+          parts.push('# ' + capsule.title);
+          parts.push('');
+          parts.push(capsule.content);
+          try {
+            await this.app.vault.create(filePath, parts.join('\n'));
+            filesCreated++;
+          } catch (err) {
+            Logger.error('Failed to create file:', err);
+          }
+        }
+        Logger.info('Created ' + filesCreated + ' capsule files');
+      }
+
       // Update local state
       this.syncState.lastSyncAt = new Date().toISOString();
       this.syncState.pendingChanges = [];
       await this.saveSyncState();
 
-      // Report results
+      // Report results (use actual files created)
+      if (filesCreated > 0) {
+        result.notes_created = filesCreated;
+        result.notes_synced = filesCreated;
+      }
       const hasConflicts = result.conflicts_found > result.conflicts_resolved;
 
       if (result.status === 'error') {
